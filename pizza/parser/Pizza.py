@@ -15,9 +15,9 @@ class Pizza:
 
     def to_submission(self, name):
         file = open(os.path.join(self.dir, "..", "submissions", name), "w")
-        file.write(str(len(self.slices)))
+        file.write(str(len(self.slices)) + "\n")
         for sl in self.slices:
-            file.write(str(sl.r1) + " " + str(sl.c1) + " " + str(sl.r2) + str(sl.c2))
+            file.write(str(sl.r1) + " " + str(sl.c1) + " " + str(sl.r2) + " " + str(sl.c2) + "\n")
         file.close()
 
     def add_slice(self, slice_to_add):
