@@ -33,6 +33,7 @@ def read_file(path, verbose):
 if __name__ == "__main__":
     p = read_data("a_example.in")
     print(p.data)
-    print(p.is_feasible(Slice.Slice(0, 0, 2, 2)))
+    print(p.is_feasible(Slice.Slice(0, 0, 2, 1)))
     p.add_slice(Slice.Slice(0, 0, 2, 1))
+    print(p.is_feasible(Slice.Slice(0, 0, 2, 1)))
     p.to_submission("test_small.txt")

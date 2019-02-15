@@ -10,6 +10,7 @@ class Pizza:
         self.l = l
         self.h = h
         self.data = data
+        self.occupied = np.zeros([self.r, self.c])
         self.slices = slices
         self.dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -25,8 +26,10 @@ class Pizza:
             self.slices = [slice_to_add]
         else:
             self.slices.append(slice_to_add)
+        self.occupied[slice_to_add.r1:slice_to_add.r2+1, slice_to_add.c1:slice_to_add.c2+1] = 1
 
     def is_feasible(self, sl):
         dim = (sl.r2 - sl.r1 + 1) * (sl.c2 - sl.c1 + 1)
         s = np.sum(self.data[sl.r1:sl.r2+1, sl.c1:sl.c2+1])
-        return dim <= self.h and s >= self.l and dim - s >= self.l
+        return dim <= self.h and s >= self.l and dim - s >= self.l and \
+               np.sum(self.occupied[sl.r1:sl.r2+1, sl.c1:sl.c2+1]) == 0
