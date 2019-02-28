@@ -31,10 +31,13 @@ class HC2019Data:
 
     def to_submission(self, name):
         file = open(os.path.join(self.dir, "..", "submissions", name), "w")
-        #file.write(str(len(self.slices)) + "\n")
-        #for sl in self.slices:
-        #    file.write(str(sl.r1) + " " + str(sl.c1) + " " + str(sl.r2) + " " + str(sl.c2) + "\n")
-        #file.close()
+        file.write(str(len(self.slideshow)) + "\n")
+        for sl in self.slideshow:
+            if sl.single:
+                file.write(str(sl.im1.id) + "\n")
+            else:
+                file.write(str(sl.im1.id) + " " + str(sl.im2.id) + "\n")
+        file.close()
 
 
 def read_data(file):
@@ -74,16 +77,21 @@ class Picture:
     def n_common_tags(self, im2):
         return len(self.tags.intersection(im2.tags))
 
-    def score(self, im2):
-        n = self.n_common_tags(im2)
-        return min(n, self.ntags - n, im2.ntags - n)
-
 
 class Slide:
     def __init__(self, im1, im2=None):
         self.im1 = im1
         self.im2 = im2
         self.single = im2 is None
+        self.tags = im1.tags if im2 is None else im1.tags.union(im2.tags)
+        self.ntags = len(self.tags)
+
+    def n_common_tags(self, slide2):
+        return len(self.tags.intersection(slide2.tags))
+
+    def score(self, slide2):
+        n = self.n_common_tags(slide2)
+        return min(n, self.ntags - n, slide2.ntags - n)
 
 
 if __name__ == '__main__':
