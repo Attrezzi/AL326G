@@ -8,8 +8,26 @@ DIRPATH = os.path.dirname(os.path.realpath(__file__))
 
 class HC2019Data:
 
-    def __init__(self):
+    def __init__(self, n_images, images):
         self.dir = os.path.dirname(os.path.realpath(__file__))
+        self.slideshow = []
+        self.used = np.zeros(n_images)
+        self.images = images
+        self.n_images = n_images
+
+    def add_to_slideshow(self, slide):
+        self.slideshow.append(slide)
+        self.used[slide.im1.id] = 1
+        if not slide.single:
+            self.used[slide.im2.id] = 1
+
+    def already_added(self, id):
+        return self.used[id] == 1
+
+    def print_all(self):
+        print("N_IMAGES ", self.n_images)
+        for im in self.images:
+            print(im.id, im.ntags, im.tags, im.is_horizontal())
 
     def to_submission(self, name):
         file = open(os.path.join(self.dir, "..", "submissions", name), "w")
@@ -19,12 +37,18 @@ class HC2019Data:
         #file.close()
 
 
-
 def read_data(file):
     filepath = os.path.join(DIRPATH, "..", "datasets", file)
     lines = read_file(filepath, False)
-    pass
-    # return pizz.Pizza(r, c, l, h, data)
+    n_ims = int(lines[0])
+    ims = []
+    for i in range(1, 1 + n_ims):
+        linespl = lines[i].split('\n')[0].split(" ")
+        h = linespl.pop(0) == 'H'
+        ntags = int(linespl.pop(0))
+        id = i - 1
+        ims.append(Picture(id, linespl, h, ntags))
+    return HC2019Data(n_ims, ims)
 
 
 def read_file(path, verbose):
@@ -36,3 +60,32 @@ def read_file(path, verbose):
         print(len(b), "samples read.")
     return b
 
+
+class Picture:
+    def __init__(self, id, tags, h, ntags):
+        self.h = h
+        self.tags = tags
+        self.ntags = ntags
+        self.id = id
+
+    def is_horizontal(self):
+        return self.h
+
+    def n_common_tags(self, im2):
+        return len(self.tags.intersection(im2.tags))
+
+    def score(self, im2):
+        n = self.n_common_tags(im2)
+        return min(n, self.ntags - n, im2.ntags - n)
+
+
+class Slide:
+    def __init__(self, im1, im2=None):
+        self.im1 = im1
+        self.im2 = im2
+        self.single = im2 is None
+
+
+if __name__ == '__main__':
+    dt = read_data("a_example.txt")
+    dt.print_all()
