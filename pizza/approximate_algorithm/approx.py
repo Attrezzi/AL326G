@@ -3,24 +3,32 @@ import utilities
 import tqdm
 import numpy as np
 
+N_SORTS = 200000
+N_PIZZAS = 2
+pizzas = []
 
-p = datareader.read_data("d_big.in")
-N_SORTS = 1000000
+for numpiz in range(N_PIZZAS):
+    p = datareader.read_data("c_medium.in")
+    nums = list(range(p.l * 2, p.h + 1))
+    nums.reverse()
 
-nums = list(range(p.l * 2, p.h + 1))
-nums.reverse()
+    for h in nums:
+        factors = utilities.factorize(h)
+        n_facts = len(factors)
+        for _ in tqdm.tqdm(range(N_SORTS)):
+            try:
+                sl = p.sort_random_slice(factors[np.random.randint(0, n_facts)])
+                if p.is_feasible(sl):
+                    p.add_slice(sl)
+            except Exception:
+                pass
+    pizzas.append(p)
 
-for h in nums:
-    factors = utilities.factorize(h)
-    n_facts = len(factors)
+for numpiz in range(1, N_PIZZAS):
+    pizzas[0].merge_pizzas(pizzas[numpiz])
 
-    for _ in tqdm.tqdm(range(N_SORTS)):
-        try:
-            sl = p.sort_random_slice(factors[np.random.randint(0, n_facts)])
-            if p.is_feasible(sl):
-                p.add_slice(sl)
-        except Exception:
-            pass
+utilities.showimage(pizzas[0].occupied)
+pizzas[0].fill_holes()
 
-
-p.to_submission("randomsub_big.txt")
+pizzas[0].to_submission("randomsub_med.txt")
+utilities.showimage(pizzas[0].occupied)
