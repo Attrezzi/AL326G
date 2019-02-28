@@ -15,12 +15,14 @@ class HC2019Data:
         self.images = images
         self.n_images = n_images
 
+    @jit
     def add_to_slideshow(self, slide):
         self.slideshow.append(slide)
         self.used[slide.im1.id] = 1
         if not slide.single:
             self.used[slide.im2.id] = 1
 
+    @jit
     def already_added(self, id):
         return self.used[id] == 1
 
@@ -39,6 +41,31 @@ class HC2019Data:
                 file.write(str(sl.im1.id) + " " + str(sl.im2.id) + "\n")
         file.close()
 
+    @jit
+    def create_good_slides(self):
+        slides = []
+        used = np.zeros(self.n_images)
+        for im in tqdm.tqdm(self.images):
+            if im.is_horizontal():
+                slides.append(Slide(im))
+            else:
+                im2 = self.get_best_vertical_couple(im, used)
+                slides.append(Slide(im, im2))
+        return slides
+
+    @jit
+    def get_best_vertical_couple(self, im, used):
+        imbest = None
+        n_tags_best = 0
+        for i in range(self.n_images):
+            if not used[i] == 1 and not self.images[i].is_horizontal():
+                sl = Slide(im, self.images[i])
+                if sl.ntags > n_tags_best:
+                    imbest = i
+                    n_tags_best = sl.ntags
+        return self.images[imbest]
+
+
 
 def read_data(file):
     filepath = os.path.join(DIRPATH, "..", "datasets", file)
@@ -50,7 +77,7 @@ def read_data(file):
         h = linespl.pop(0) == 'H'
         ntags = int(linespl.pop(0))
         id = i - 1
-        ims.append(Picture(id, linespl, h, ntags))
+        ims.append(Picture(id, set(linespl), h, ntags))
     return HC2019Data(n_ims, ims)
 
 
