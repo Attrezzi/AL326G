@@ -65,8 +65,6 @@ print('Saving..')
 save_npz('/sparse_matrix.npz', final_matrix)
 print('Saved..')
 
-
-sparse_matrix = scipy.sparse.load_npz('/sparse_matrix.npz')
 '''
 tensor = SparseTensor(indices=coordinates_list, values=np.ones(len(coordinates_list)), dense_shape=[photo_number, token_number])
 T_tensor = tf.sparse.transpose(tensor)
