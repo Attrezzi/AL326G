@@ -15,6 +15,11 @@ class HC2019Data:
         self.images = images
         self.n_images = n_images
 
+    def print_slideshow(self):
+        for slide in self.slideshow:
+            slide.print_slide()
+
+
     @jit
     def add_to_slideshow(self, slide):
         self.slideshow.append(slide)
@@ -137,7 +142,11 @@ class Slide:
         n = self.n_common_tags(slide2)
         return min(n, self.ntags - n, slide2.ntags - n)
 
-
+    def print_slide(self):
+        if self.im2 is not None:
+            print('[V|V] tags: {}, ntags: {}'.format(self.tags,self.ntags))
+        else:
+            print('[H] tags: {}, ntags: {}'.format(self.tags,self.ntags))
 if __name__ == '__main__':
     dt = read_data("a_example.txt")
     dt.print_all()
