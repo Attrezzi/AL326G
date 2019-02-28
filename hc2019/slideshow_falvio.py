@@ -64,6 +64,7 @@ print('Final matrix created',final_matrix.shape)
 print('Saving..')
 save_npz('/sparse_matrix.npz', final_matrix)
 print('Saved..')
+###
 
 '''
 tensor = SparseTensor(indices=coordinates_list, values=np.ones(len(coordinates_list)), dense_shape=[photo_number, token_number])
