@@ -46,38 +46,55 @@ class HC2019Data:
         slides = []
         used = np.zeros(self.n_images)
         for im in tqdm.tqdm(self.images):
-            if im.is_horizontal():
-                slides.append(Slide(im))
-            else:
-                im2 = self.get_best_vertical_couple(im, used)
-                slides.append(Slide(im, im2))
+            if not used[im.id] == 1:
+                if im.is_horizontal():
+                    slides.append(Slide(im))
+                    used[im.id] = 1
+                else:
+                    im2 = self.get_best_vertical_couple(im, used)
+                    if im2 is not None:
+                        slides.append(Slide(im, im2))
+                        used[im.id] = 1
+                        used[im2.id] = 1
         return slides
 
-    @jit
     def get_best_vertical_couple(self, im, used):
-        imbest = None
+        imagebest = None
         n_tags_best = 0
-        for i in range(self.n_images):
+        for i in range(im.id + 1, self.n_images):
             if not used[i] == 1 and not self.images[i].is_horizontal():
                 sl = Slide(im, self.images[i])
                 if sl.ntags > n_tags_best:
-                    imbest = i
+                    imagebest = i
                     n_tags_best = sl.ntags
-        return self.images[imbest]
+                    break
+
+        if imagebest is None:
+            return None
+        used[imagebest] = 1
+        return self.images[imagebest]
 
 
 
-def read_data(file):
+def read_data(file, get_tags_dict=False):
     filepath = os.path.join(DIRPATH, "..", "datasets", file)
     lines = read_file(filepath, False)
     n_ims = int(lines[0])
     ims = []
+    tags_dict = {}
     for i in range(1, 1 + n_ims):
         linespl = lines[i].split('\n')[0].split(" ")
         h = linespl.pop(0) == 'H'
         ntags = int(linespl.pop(0))
         id = i - 1
         ims.append(Picture(id, set(linespl), h, ntags))
+        for tag in linespl:
+            try:
+                tags_dict[tag].append(i-1)
+            except Exception:
+                tags_dict[tag] = [i-1]
+    if get_tags_dict:
+        return HC2019Data(n_ims, ims), tags_dict
     return HC2019Data(n_ims, ims)
 
 
