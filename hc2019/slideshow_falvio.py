@@ -3,7 +3,6 @@ import tensorflow as tf
 import numpy as np
 from tensorflow import SparseTensor
 
-
 #dt = read_data("a_example.txt")
 dataset = "b_lovely_landscapes.txt"
 initial_data = read_data(dataset)
@@ -38,22 +37,45 @@ count = 0
 photo_number = len(token_ids)
 print(photo_number)
 
+i_list = []
+j_list = []
 for lst in token_ids:
     one_hot_encoded_list = np.zeros(len(word_to_id))
     for element in lst:
         coordinates_list.append([count,element])
+        i_list.append(count)
+        j_list.append(element)
     count = count + 1
         #one_hot_encoded_list[element] += 1
 
 print('Starting tensors')
+from scipy.sparse import  coo_matrix,csr_matrix,save_npz
+mat = coo_matrix((np.ones(len(coordinates_list)), (i_list, j_list)), shape=(photo_number, token_number)).tocsr()
 
+print(mat.shape)
+print(mat.transpose().shape)
+
+final_matrix = mat.dot(mat.transpose())
+print(type(final_matrix))
+#print(final_matrix)
+#final_matrix.save('finalona.npy')
+print('Final matrix created',final_matrix.shape)
+
+print('Saving..')
+save_npz('/sparse_matrix.npz', final_matrix)
+print('Saved..')
+###
+
+'''
 tensor = SparseTensor(indices=coordinates_list, values=np.ones(len(coordinates_list)), dense_shape=[photo_number, token_number])
-T_tensor = tf.transpose(tensor)
+T_tensor = tf.sparse.transpose(tensor)
+print(type(T_tensor))
 print('Starting tensors')
 
-result = tf.matmul(tensor,T_tensor)
+result = tf.sparse_matmul(tensor,T_tensor)
 print('Starting tensors')
 print(result.shape)
+'''
 #one_hot = SparseTensor(X)
 
 #dt = read_data("c_memorable_moments.txt")
