@@ -55,15 +55,8 @@ mat = coo_matrix((np.ones(len(coordinates_list)), (i_list, j_list)), shape=(phot
 print(mat.shape)
 print(mat.transpose().shape)
 
-final_matrix = mat.dot(mat.transpose())
-print(type(final_matrix))
-#print(final_matrix)
-#final_matrix.save('finalona.npy')
-print('Final matrix created',final_matrix.shape)
+final_matrix = mat.dot(mat.transpose()).todense()
 
-print('Saving..')
-save_npz('/sparse_matrix.npz', final_matrix)
-print('Saved..')
 ###
 
 '''
